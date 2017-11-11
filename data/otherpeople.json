@@ -1,0 +1,16 @@
+{
+	"otherpeople":[
+		{
+			"id": 1,
+			"first_name": "Lewis",
+			"last_name": "Caroll",
+			"hobbies": ["writings", "drugs"]
+		},
+		{
+			"id": 2,
+			"first_name": "Douglas",
+			"last_name": "Hoffstadter",
+			"hobbies": ["Godel", "Escher", "Bach"]
+		}
+	]
+}

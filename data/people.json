@@ -1,0 +1,22 @@
+{
+	"people":[
+		{
+			"id": 1,
+			"first_name": "Kurt",
+			"last_name": "Godel",
+			"hobbies": ["incompleteness", "logic"]
+		},
+		{
+			"id": 2,
+			"first_name": "Johann Sebastian",
+			"last_name": "Bach",
+			"hobbies": ["fugues", "glassblowing", "church organ"]
+		},
+		{
+			"id": 3,
+			"first_name": "Maurits Cornelis",
+			"last_name": "Echer",
+			"hobbies": ["woodcuts", "lithographs", "mezzotints"]
+		}
+	]
+}
