@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"log"
@@ -8,13 +9,15 @@ import (
 	"os"
 	"path/filepath"
 	"time"
+
+	"github.com/gorilla/mux"
 )
 
 func serveIndex(w http.ResponseWriter, req *http.Request) {
 	http.ServeFile(w, req, "../index.html")
 }
 
-func handleReq(w http.ResponseWriter, req *http.Request) {
+func handleGET(w http.ResponseWriter, req *http.Request) {
 	start := time.Now()
 
 	// kinda hacky way to get .json
@@ -25,14 +28,48 @@ func handleReq(w http.ResponseWriter, req *http.Request) {
 	log.Printf("REQ: %s %s %s", req.Method, req.URL, elapsed)
 }
 
-func main() {
-	mux := http.NewServeMux()
+func handlePUT(w http.ResponseWriter, req *http.Request) {
+	start := time.Now()
 
-	// port number supplyed from command args
+	type ReqBody struct {
+		JSON string
+	}
+
+	body, err := ioutil.ReadAll(req.Body)
+	if err != nil {
+		panic(err)
+	}
+	log.Println(string(body))
+	var j ReqBody
+	err = json.Unmarshal(body, &j)
+	if err != nil {
+		panic(err)
+	}
+
+	now := time.Now()
+	elapsed := now.Sub(start)
+	log.Printf("REQ: %s %s %s", req.Method, req.URL, elapsed)
+}
+
+func handleRequest(w http.ResponseWriter, req *http.Request) {
+
+	switch req.Method {
+
+	case "GET":
+		handleGET(w, req)
+	case "PUT":
+		handlePUT(w, req)
+	}
+}
+
+func main() {
+	r := mux.NewRouter()
+
+	// port number supplyed as commandline arg 1
 	port := ":" + os.Args[1]
 	fmt.Println("Go JSON server listening at localhost" + port)
 
-	mux.HandleFunc("/", serveIndex)
+	r.HandleFunc("/", serveIndex)
 
 	// get all json endpoints from 'data'
 	endpoints, err := ioutil.ReadDir("../data")
@@ -45,11 +82,12 @@ func main() {
 	for _, file := range endpoints {
 		filename := file.Name()
 		extension := filepath.Ext(filename)
-		endpoint := filename[0 : len(filename)-len(extension)] // filename without extension
+		endpoint := "/" + filename[0:len(filename)-len(extension)] // filename without extension
 
-		fmt.Printf("/%s \n", endpoint)
-		mux.HandleFunc("/"+endpoint, handleReq)
+		fmt.Printf("%s \n", endpoint)
+		r.HandleFunc(endpoint, handleRequest).Methods("GET", "PUT")
+
 	}
 
-	log.Fatal(http.ListenAndServe(port, mux))
+	http.ListenAndServe(port, r)
 }
